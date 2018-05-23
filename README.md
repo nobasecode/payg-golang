@@ -1,2 +1,2 @@
-# golang-docker-snmp
-# golang-docker-snmp
+Golang script for counting containers ruuning time in Docker platforme
+- n+one
