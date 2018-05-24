@@ -1,15 +1,18 @@
 package main
 
 import (
-        "fmt"
-        "log"
-        "os/exec"
+    "fmt"
+    "log"
+    "os/exec"
 	"strings"
 	"time"
 	"os"
 	"io/ioutil"
-	//"strconv"
+	"strconv"
+    "./cron"
+
 )
+
 
 const (
     timeFormat = "2006-01-02 15:04:05"
@@ -40,7 +43,9 @@ func s_date(d string) time.Time{
 func diff_date(finished time.Time,lastup time.Time) int{
 
 	diff := finished.Sub(lastup)
+    if diff.Seconds() > 0 { 
         return int(diff.Seconds())
+    } else { return 0 }
 }
 
 //Difference bettwen Last-updated & Now Dates
@@ -48,6 +53,7 @@ func diff_date_now(lastup time.Time) int{
 
         diff := time.Since(lastup)
         return int(diff.Seconds())
+        
 }
 
 //get a list of running docker containers
@@ -83,6 +89,40 @@ func inspect() [][]string {
 
 }
 
+
+//read into watchlist & get container infos
+func file_to_c(f_name string) [][]string{
+
+    var c_file [][]string
+    var c []string
+
+    watchlist, err := os.Open(f_name)
+        if err != nil {
+                log.Fatal(err)
+        }
+
+        lines, err := ioutil.ReadAll(watchlist)
+                if err != nil {
+                log.Fatal(err)
+        }
+
+        line := strings.Split(string(lines), "\n")
+
+        for i := range line[:len(line)-1] {
+                line_part := strings.Split(string(line[i]), "|")
+                c = append(c, line_part[0])
+                c = append(c, line_part[1])
+                c = append(c, line_part[2])
+
+                c_file = append(c_file, c)
+                c = nil
+        }
+
+    watchlist.Close()
+
+    return c_file
+}
+
 //read into watchlist & get container names
 func file_to_c_name(f_name string) []string{
 
@@ -108,14 +148,15 @@ func file_to_c_name(f_name string) []string{
 	watchlist.Close()
 
 	return c_names
-
 }
+
+
 
 //add new containers to file
 func add_container_file(containers [][]string){
 
         c_names := (file_to_c_name("watchlist"))
-        fmt.Println(c_names)
+        //fmt.Println(c_names)
 
         for i := range containers {
 
@@ -127,44 +168,75 @@ func add_container_file(containers [][]string){
                         }
                         f.WriteString(containers[i][0]+"|0|"+containers[i][3]+"\n")
                         f.Close()
-		}
+                }
         }
-
 }
 
 func pay_as_go(containers [][]string) {
 
 	add_container_file(containers)
+    
+	c_file := file_to_c("watchlist")
+    //fmt.Println(c_file)
+    all := ""
+    
+    for i := range containers {
         
-	watchlist, err := os.Open("watchlist")
-        if err != nil {
-                log.Fatal(err)
+        running , err := strconv.ParseBool(containers[i][1])
+        if err != nil {panic(err)}
+
+        if running == true {
+            for j := range c_file {
+                if containers[i][0] == c_file[j][0] {
+
+                    last_value , err:= strconv.Atoi(c_file[j][1])
+                    if err != nil {log.Fatal(err)}
+                    new_time := last_value+diff_date_now(s_date(c_file[j][2]))
+                    
+                    //fmt.Println(diff_date_now(s_date(c_file[j][2])))
+                    
+                    t := time.Now()                    
+                    all = all+containers[i][0]+"|"+strconv.Itoa(new_time)+"|"+t.Format("2006-01-02 15:04:05")+"\n"
+                }
+            }
+        } else if running == false {
+            for j := range c_file {
+                if containers[i][0] == c_file[j][0] {
+
+                    last_value , err:= strconv.Atoi(c_file[j][1])
+                    if err != nil {log.Fatal(err)}
+                    new_time := last_value+diff_date(s_date(containers[i][3]),s_date(c_file[j][2]))
+                    
+                    //fmt.Println(diff_date(s_date(containers[i][3]),s_date(c_file[j][2])))
+                    
+                    t := time.Now()
+                    all = all+containers[i][0]+"|"+strconv.Itoa(new_time)+"|"+t.Format("2006-01-02 15:04:05")+"\n"
+
+                }
+            }
         }
 
-        lines, err := ioutil.ReadAll(watchlist)
-                if err != nil {
-                log.Fatal(err)
-        }
+    }
 
-        line := strings.Split(string(lines), "\n")
+    err := ioutil.WriteFile("watchlist", []byte(all), 0666)
+    if err != nil {log.Fatal(err)}
 
-        var c_names []string
-        for i := range line[:len(line)-1] {
-                line_part := strings.Split(string(line[i]), "|")
-                c_names = append(c_names, line_part[0])
-
-        }
-
-        watchlist.Close()
+    fmt.Println("\n"+all)
 
 }
 
 func main(){
 
-        containers:=inspect()
-
-        fmt.Println(containers)
+    c := cron.New()
+    c.AddFunc("@every 2s", func() { 
+        pay_as_go(inspect())
+        fmt.Println(inspect())
+     })
+    c.Run()
+    c.Start()
+ 
+    
 	
-	pay_as_go(containers)
+	
 
 }
