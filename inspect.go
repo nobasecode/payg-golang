@@ -247,7 +247,7 @@ func main(){
     c := cron.New()
     c.AddFunc("@every 2s", func() { 
         pay_as_go(inspect())
-        //fmt.Println(inspect())
+        fmt.Println(inspect())
      })
     c.Run()
     c.Start()
