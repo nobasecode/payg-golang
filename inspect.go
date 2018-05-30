@@ -56,6 +56,19 @@ func diff_date_now(lastup time.Time) int{
         
 }
 
+//show status of containers
+func show_status(a string){
+    
+    a = a+"\033[39m"
+    output, err := exec.Command("echo", "-e",a).CombinedOutput()
+    if err != nil {
+      os.Stderr.WriteString(err.Error())
+    }
+    fmt.Println(string(output))
+     
+}
+
+
 //get a list of running docker containers
 func inspect() [][]string {
 	
@@ -195,7 +208,7 @@ func pay_as_go(containers [][]string) {
                     //fmt.Println(diff_date_now(s_date(c_file[j][2])))
                     
                     t := time.Now()
-                    a = a+"\033[32m"+containers[i][0]+"|"+strconv.Itoa(new_time)+"|"+t.Format("2006-01-02 15:04:05")+"\n"+"\033[39m"                  
+                    a = a+"\033[32m"+containers[i][0]+" - "+strconv.Itoa(new_time)+" - "+t.Format("2006-01-02 15:04:05")+"\n"                
                     
                     all = all+containers[i][0]+"|"+strconv.Itoa(new_time)+"|"+t.Format("2006-01-02 15:04:05")+"\n"
                 }
@@ -211,7 +224,7 @@ func pay_as_go(containers [][]string) {
                     //fmt.Println(diff_date(s_date(containers[i][3]),s_date(c_file[j][2])))
                     
                     t := time.Now()
-                    a = a+"\033[31m"+containers[i][0]+"|"+strconv.Itoa(new_time)+"|"+t.Format("2006-01-02 15:04:05")+"\n"+"\033[39m"
+                    a = a+"\033[31m"+containers[i][0]+" - "+strconv.Itoa(new_time)+" - "+t.Format("2006-01-02 15:04:05")+"\n"
                     
                     all = all+containers[i][0]+"|"+strconv.Itoa(new_time)+"|"+t.Format("2006-01-02 15:04:05")+"\n"
 
@@ -224,14 +237,8 @@ func pay_as_go(containers [][]string) {
     err := ioutil.WriteFile("watchlist", []byte(all), 0666)
     if err != nil {log.Fatal(err)}
 
-    //fmt.Println("\n"+all)
-
-	output, err := exec.Command("echo", "-e",a).CombinedOutput()
-	if err != nil {
-	  os.Stderr.WriteString(err.Error())
-	}
-	fmt.Println(string(output)) 	
-
+    
+    show_status(a)
 	 
 }
 
