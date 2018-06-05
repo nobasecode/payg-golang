@@ -16,6 +16,10 @@ import (
 
 const (
     timeFormat = "2006-01-02 15:04:05"
+    ram_price = 0.001
+    cpu_price = 0.002
+    disk_price = 0.001
+
 )
 
 //verify if a string exist in a slice
@@ -161,13 +165,85 @@ func file_to_c_name(f_name string) []string{
     return c_names
 }
 
+//Configuration liste
+func conf_to_map() map[string][]string{
 
+    conf := make(map[string][]string)
+
+    conf_file, err := os.Open("conf")
+    if err != nil {log.Fatal(err)}
+
+    lines, err := ioutil.ReadAll(conf_file)
+    if err != nil {log.Fatal(err)}
+
+    line := strings.Split(string(lines), "\n")
+
+    for i := range line[:len(line)] {
+            line_part := strings.Split(string(line[i]), "|")
+
+            conf[line_part[0]] = append(conf[line_part[0]], line_part[0])
+            conf[line_part[0]] = append(conf[line_part[0]], line_part[1])
+            conf[line_part[0]] = append(conf[line_part[0]], line_part[2])
+            conf[line_part[0]] = append(conf[line_part[0]], line_part[3])
+            conf[line_part[0]] = append(conf[line_part[0]], line_part[4])
+    }
+
+    conf_file.Close()
+
+    return conf
+}
+
+//Credit liste
+func credit_to_map() map[string][]string{
+
+    credit := make(map[string][]string)
+
+    credit_file, err := os.Open("credit")
+    if err != nil {log.Fatal(err)}
+
+    lines, err := ioutil.ReadAll(credit_file)
+    if err != nil {log.Fatal(err)}
+
+    line := strings.Split(string(lines), "\n")
+
+    for i := range line[:len(line)-1] {
+            line_part := strings.Split(string(line[i]), "|")
+
+            credit[line_part[0]] = append(credit[line_part[0]], line_part[1])
+    }
+
+    credit_file.Close()
+
+    return credit
+}
+
+func credit_to_file(credit map[string][]string){
+
+    all_c := ""
+    show := "|ID|Credit\n"
+
+    for k, v := range credit {
+        all_c = all_c+k+"|"+v[0]+"|\n"
+
+        show = show+"|"+k+"|"+v[0]+"\n"
+    }    
+    fmt.Println(show)
+
+    err := ioutil.WriteFile("credit", []byte(all_c), 0666)
+    if err != nil {log.Fatal(err)}    
+
+}
+
+//calculate using /DH
+func calculate_use(ram int,cpu int,disk int,s int) float64{
+
+    return float64(float64(ram)*float64(s)*ram_price)+(float64(cpu)*float64(s)*cpu_price)+(float64(disk)*float64(s)*disk_price)
+}
 
 //add new containers to file
 func add_container_file(containers [][]string){
 
         c_names := (file_to_c_name("watchlist"))
-        //fmt.Println(c_names)
 
         for i := range containers {
 
@@ -183,12 +259,16 @@ func add_container_file(containers [][]string){
         }
 }
 
-func pay_as_go(containers [][]string) {
+func payg(containers [][]string) {
 
     add_container_file(containers)
-    
+    conf := conf_to_map()
+
+    credit := credit_to_map()
+
     c_file := file_to_c("watchlist")
-    //fmt.Println(c_file)
+
+
     all := ""
     a := "\n"
 
@@ -203,13 +283,32 @@ func pay_as_go(containers [][]string) {
 
                     last_value , err:= strconv.Atoi(c_file[j][1])
                     if err != nil {log.Fatal(err)}
-                    new_time := last_value+diff_date_now(s_date(c_file[j][2]))
+                    date_diff := diff_date_now(s_date(c_file[j][2]))
+                    new_time := last_value+date_diff
+
+
+                    id := conf[containers[i][0]][4]
+                    ram , err:= strconv.Atoi(conf[containers[i][0]][1])
+                    if err != nil {log.Fatal(err)}
+                    cpu , err:= strconv.Atoi(conf[containers[i][0]][2])
+                    if err != nil {log.Fatal(err)}
+                    disk , err:= strconv.Atoi(conf[containers[i][0]][3])
+                    if err != nil {log.Fatal(err)}
+                    now_credit, err := strconv.ParseFloat(credit[id][0],64)
+                    if err != nil {log.Fatal(err)}
+
+
+                    use := calculate_use(ram,cpu,disk,date_diff)                    
+                    new_credit := now_credit-use
+                    credit[id][0] = strconv.FormatFloat(new_credit, 'f', 3, 64)
+                     
+                     //fmt.Println(credit)
+                     //fmt.Println(now_credit)
                     
-                    //fmt.Println(diff_date_now(s_date(c_file[j][2])))
-                    
+
                     t := time.Now()
                     a = a+"\033[32m"+containers[i][0]+" - "+strconv.Itoa(new_time)+" - "+t.Format("2006-01-02 15:04:05")+"\n"                
-                    
+
                     all = all+containers[i][0]+"|"+strconv.Itoa(new_time)+"|"+t.Format("2006-01-02 15:04:05")+"\n"
                 }
             }
@@ -219,13 +318,32 @@ func pay_as_go(containers [][]string) {
 
                     last_value , err:= strconv.Atoi(c_file[j][1])
                     if err != nil {log.Fatal(err)}
-                    new_time := last_value+diff_date(s_date(containers[i][3]),s_date(c_file[j][2]))
+                    date_diff := diff_date(s_date(containers[i][3]),s_date(c_file[j][2]))
+                    new_time := last_value+date_diff
+
+
+                     id := conf[containers[i][0]][4]
+                     ram , err:= strconv.Atoi(conf[containers[i][0]][1])
+                     if err != nil {log.Fatal(err)}
+                     cpu , err:= strconv.Atoi(conf[containers[i][0]][2])
+                     if err != nil {log.Fatal(err)}
+                     disk , err:= strconv.Atoi(conf[containers[i][0]][3])
+                     if err != nil {log.Fatal(err)}
+                     now_credit, err := strconv.ParseFloat(credit[id][0],64)
+                     if err != nil {log.Fatal(err)}                    
+
+
+                    use := calculate_use(ram,cpu,disk,date_diff)                    
+                    new_credit := now_credit-use
+                    credit[id][0] = strconv.FormatFloat(new_credit, 'f', 3, 64)
                     
-                    //fmt.Println(diff_date(s_date(containers[i][3]),s_date(c_file[j][2])))
-                    
+                    // fmt.Println(credit)
+                    // fmt.Println(now_credit)
+
+
                     t := time.Now()
                     a = a+"\033[31m"+containers[i][0]+" - "+strconv.Itoa(new_time)+" - "+t.Format("2006-01-02 15:04:05")+"\n"
-                    
+
                     all = all+containers[i][0]+"|"+strconv.Itoa(new_time)+"|"+t.Format("2006-01-02 15:04:05")+"\n"
 
                 }
@@ -236,21 +354,24 @@ func pay_as_go(containers [][]string) {
 
     err := ioutil.WriteFile("watchlist", []byte(all), 0666)
     if err != nil {log.Fatal(err)}
-
+    
+    // fmt.Println(credit)
+    credit_to_file(credit)
     
     show_status(a)
-     
+
 }
 
 func main(){
 
+
     c := cron.New()
     c.AddFunc("@every 2s", func() { 
-        pay_as_go(inspect())
+        payg(inspect())
         //fmt.Println(inspect())
+
      })
     c.Run()
     c.Start()
-
 
 }
