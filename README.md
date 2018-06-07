@@ -1,2 +1,2 @@
-- If you build a CaaS platforme with PAYG system, you will need this script
+- If you want to build a Containers as a Service (CaaS) platforme with Pay As You Go (PAYG) system, you will need this script
 - Golang script for counting containers running time in Docker platforme
