@@ -23,9 +23,9 @@ $ echo "" > credit
 ```
 $ echo "" > conf
 ```
-One you clean all files you will need to add your own information:
+One you clean all files you will need to add your own informations:
 
-- Watchlist will be auto-updated with your container details once you start the script.
+- Watchlist will be auto-updated with your containers details once you start the script.
 
 - Add every your containers configurations manually in "conf" file , following this schema:
 `container name|RAM(mb)|CPU Number|Disk Size(gb)|User ID|`
