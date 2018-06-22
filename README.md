@@ -33,4 +33,4 @@ One you clean all files you will need to add your own informations:
 - Add users credit in "credit" file, following this schema:
 `User ID|Credit($)|`
 
-**Soon : Golang script to create Docker containers**
+**Golang script to create Docker containers : https://github.com/nobasecode/ContainerGoCreator.git**
