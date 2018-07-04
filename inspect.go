@@ -46,16 +46,23 @@ func s_date(d string) time.Time{
 //Difference bettwen Last-updated & Container-Finished Dates
 func diff_date(finished time.Time,lastup time.Time) int{
 
-    diff := finished.Sub(lastup)
+    diff := lastup.Sub(finished)
     if diff.Seconds() > 0 { 
         return int(diff.Seconds())
     } else { return 0 }
+
+    // diff := lastup.Sub(finished)
+    // return int(diff.Seconds())
 }
 
 //Difference bettwen Last-updated & Now Dates
 func diff_date_now(lastup time.Time) int{
 
-        diff := time.Since(lastup)
+
+        current_time := time.Now().Local()
+        now_d := s_date(current_time.Format(timeFormat))
+        diff := now_d.Sub(lastup)
+        //diff := time.Since(lastup)
         return int(diff.Seconds())
         
 }
@@ -268,6 +275,10 @@ func payg(containers [][]string) {
 
     c_file := file_to_c("watchlist")
 
+    // fmt.Println(containers)
+    // fmt.Println(conf_to_map())
+    // fmt.Println(credit_to_map())
+
 
     all := ""
     a := "\n"
@@ -285,6 +296,15 @@ func payg(containers [][]string) {
                     if err != nil {log.Fatal(err)}
                     date_diff := diff_date_now(s_date(c_file[j][2]))
                     new_time := last_value+date_diff
+
+                    //fmt.Println(c_file[j][2])
+                    //fmt.Println(s_date(c_file[j][2]))
+                    
+                    //current_time := time.Now().Local()
+                    //fmt.Println(s_date(current_time.Format(timeFormat)))
+
+                    //fmt.Println(diff_date(s_date(c_file[j][2]),s_date(current_time.Format(timeFormat))))
+                    //fmt.Println(diff_date_now(s_date(c_file[j][2])))
 
 
                     id := conf[containers[i][0]][4]
@@ -318,8 +338,15 @@ func payg(containers [][]string) {
 
                     last_value , err:= strconv.Atoi(c_file[j][1])
                     if err != nil {log.Fatal(err)}
-                    date_diff := diff_date(s_date(containers[i][3]),s_date(c_file[j][2]))
+                    date_diff := diff_date(s_date(containers[i][3]).Add(time.Hour * time.Duration(1) +time.Minute * time.Duration(0) +time.Second * time.Duration(0)),s_date(c_file[j][2]))
                     new_time := last_value+date_diff
+
+                    // fmt.Println(s_date(containers[i][3]).Add(time.Hour * time.Duration(0) +
+                    //              time.Minute * time.Duration(0) +
+                    //              time.Second * time.Duration(0)))
+                    // fmt.Println(s_date(c_file[j][2]))
+
+                    // fmt.Println(diff_date(s_date(containers[i][3]).Add(time.Hour * time.Duration(1) +time.Minute * time.Duration(0) +time.Second * time.Duration(0)),s_date(c_file[j][2])))
 
 
                      id := conf[containers[i][0]][4]
@@ -355,7 +382,7 @@ func payg(containers [][]string) {
     err := ioutil.WriteFile("watchlist", []byte(all), 0666)
     if err != nil {log.Fatal(err)}
     
-    // fmt.Println(credit)
+    //fmt.Println(containers)
     credit_to_file(credit)
     
     show_status(a)
@@ -363,7 +390,6 @@ func payg(containers [][]string) {
 }
 
 func main(){
-
 
     c := cron.New()
     c.AddFunc("@every 2s", func() { 
