@@ -46,7 +46,7 @@ func s_date(d string) time.Time{
 //Difference bettwen Last-updated & Container-Finished Dates
 func diff_date(finished time.Time,lastup time.Time) int{
 
-    diff := lastup.Sub(finished)
+    diff := finished.Sub(lastup)
     if diff.Seconds() > 0 { 
         return int(diff.Seconds())
     } else { return 0 }
@@ -338,7 +338,7 @@ func payg(containers [][]string) {
 
                     last_value , err:= strconv.Atoi(c_file[j][1])
                     if err != nil {log.Fatal(err)}
-                    date_diff := diff_date(s_date(containers[i][3]).Add(time.Hour * time.Duration(1) +time.Minute * time.Duration(0) +time.Second * time.Duration(0)),s_date(c_file[j][2]))
+                    date_diff := diff_date(s_date(containers[i][4]).Add(time.Hour * time.Duration(1) +time.Minute * time.Duration(0) +time.Second * time.Duration(0)),s_date(c_file[j][2]))
                     new_time := last_value+date_diff
 
                     // fmt.Println(s_date(containers[i][3]).Add(time.Hour * time.Duration(0) +
@@ -347,6 +347,9 @@ func payg(containers [][]string) {
                     // fmt.Println(s_date(c_file[j][2]))
 
                     // fmt.Println(diff_date(s_date(containers[i][3]).Add(time.Hour * time.Duration(1) +time.Minute * time.Duration(0) +time.Second * time.Duration(0)),s_date(c_file[j][2])))
+                    // fmt.Println(s_date(containers[i][4]).Add(time.Hour * time.Duration(1) +time.Minute * time.Duration(0) +time.Second * time.Duration(0)))
+                    // fmt.Println(s_date(c_file[j][2]))
+                    // fmt.Println(date_diff)
 
 
                      id := conf[containers[i][0]][4]
@@ -383,9 +386,8 @@ func payg(containers [][]string) {
     if err != nil {log.Fatal(err)}
     
     //fmt.Println(containers)
-    credit_to_file(credit)
-    
-    show_status(a)
+     credit_to_file(credit)
+     show_status(a)
 
 }
 
