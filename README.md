@@ -1,10 +1,41 @@
 
-### **PAY AS YOU GOlang**
+# PAY AS YOU GOlang
+
 - Golang script for counting Docker containers running time & users credit with instant update.
 - If you want to build a Containers as a Service (CaaS) platforme with Pay As You Go (PAYG) system, you will need this script.
 
-
 **_Instructions_**
+
+---------------------------------------
+### **SQL Storage (MariaDB)**
+
+To install this project:
+
+```
+$ git clone https://github.com/nobasecode/payg-golang.git
+```
+
+Import database from payg.sql
+
+```
+$ CREATE DATABASE newdatabase;
+```
+```
+$ mysql -u [username] -p newdatabase < [database name].sql
+```
+
+You need to clean the follwing tables (credit & configuration) and add your own containers informations.
+
+lunch script
+
+```
+$ go run main.go
+```
+
+---------------------------------------
+
+
+### **Flat Files Storage**
 
 To install this project:
 
@@ -32,5 +63,6 @@ One you clean all files you will need to add your own informations:
 
 - Add users credit in "credit" file, following this schema:
 `User ID|Credit($)|`
+
 
 **Golang script to create Docker containers : https://github.com/nobasecode/ContainerGoCreator.git**
