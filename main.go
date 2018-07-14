@@ -15,6 +15,9 @@ import (
 )
 
 
+//mysqldump -u root -p payg > /home/blackbase/project/payg.sql
+
+
 const (
     timeFormat = "2006-01-02 15:04:05"
     ram_price = 0.001
