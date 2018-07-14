@@ -7,7 +7,6 @@ import (
     "strings"
     "time"
     "os"
-    "io/ioutil"
     "strconv"
     "./cron"
     "database/sql"
@@ -251,9 +250,7 @@ func credit_to_file(credit map[string][]string){
         show = show+"|"+k+"|"+v[0]+"\n"
     }    
     fmt.Println(show)
-
-    err := ioutil.WriteFile("credit", []byte(all_c), 0666)
-    if err != nil {log.Fatal(err)}    
+  
 
 }
 //credit_to_file
@@ -313,11 +310,6 @@ func payg(containers [][]string) {
     credit := select_credit()
 
     c_file := select_watchlist()
-
-    // fmt.Println(containers)
-    // fmt.Println(conf_to_map())
-    // fmt.Println(credit_to_map())
-
 
     // all := ""
     a := "\n"
@@ -400,6 +392,7 @@ func payg(containers [][]string) {
 
     }
      
+     credit_to_file(credit)
      show_status(a)
 
 }
