@@ -46,6 +46,17 @@ type Configuration struct {
     id_user string `json:"id_user"`
 }
 
+type Log struct {
+    container   string    `json:"container"`
+    id_user string `json:"id_user"`
+    using_s string `json:"using_s"`
+    using_moment string `json:"using_moment"`
+    update_date string `json:"update_date"`
+    ram string `json:"ram"`
+    cpu string `json:"cpu"`
+    storage string `json:"storage"`
+}
+
 func dbConn() (db *sql.DB) {
     dbDriver := "mysql"
     dbUser := "root"
@@ -304,6 +315,14 @@ func update_watchlist(container string,using_s string,update_date string){
     defer db.Close()
 }
 
+func insert_log(container string,id_user string,using_s string,using_moment string,update_date string,ram string,cpu string,storage string){
+
+    db := dbConn()
+     insert, err := db.Query("INSERT INTO log VALUES ('"+container+"', '"+id_user+"', '"+using_s+"', '"+using_moment+"', '"+update_date+"', '"+ram+"', '"+cpu+"', '"+storage+"')")
+     if err != nil {panic(err.Error())}
+
+     defer insert.Close()
+}
 
 func payg(containers [][]string) {
 
@@ -352,9 +371,9 @@ func payg(containers [][]string) {
                     t := time.Now()
                     a = a+"\033[32m"+containers[i][0]+" - "+strconv.Itoa(new_time)+" - "+t.Format("2006-01-02 15:04:05")+"\n"                
 
-                    //all = all+containers[i][0]+"|"+strconv.Itoa(new_time)+"|"+t.Format("2006-01-02 15:04:05")+"\n"
-
                     update_watchlist(containers[i][0],strconv.Itoa(new_time),t.Format("2006-01-02 15:04:05"))
+
+                    insert_log(containers[i][0],id,strconv.Itoa(new_time),strconv.Itoa(date_diff),t.Format("2006-01-02 15:04:05"),strconv.Itoa(ram),strconv.Itoa(cpu),strconv.Itoa(disk))
 
                 }
             }
