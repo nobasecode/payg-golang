@@ -2,9 +2,14 @@ package main
 
 import (
 	"fmt"
-	"database/sql"
-	_ "github.com/go-sql-driver/mysql"
     "strconv"
+    "log"
+	"database/sql"
+    "net/http"
+    "encoding/json"
+
+	_ "github.com/go-sql-driver/mysql"
+    "github.com/gorilla/mux"
 )
 
 type Watchlist struct {
@@ -80,9 +85,7 @@ func select_use(container string,id_user string,update_date1 string,update_time1
 
 }
 
-
-func main() {
-
+func call_select_use() {
     fmt.Print("Container name: ")
     var c string
     fmt.Scanln(&c)  
@@ -107,7 +110,64 @@ func main() {
     var ft string
     fmt.Scanln(&ft)   
 
-    select_use(c,id,sd,st,fd,ft)
+    select_use(c,id,sd,st,fd,ft)    
+}
 
+
+func GetCredit_json(w http.ResponseWriter, r *http.Request){
+
+    db := dbConn()
+    var credit []Credit
+
+    results, err := db.Query("SELECT id_user,credit FROM credit")
+    if err != nil {panic(err.Error())}
+    for results.Next() {
+        var c Credit
+        err = results.Scan(&c.id_user, &c.credit)
+        if err != nil {panic(err.Error())}
+        credit = append(credit, Credit {id_user: c.id_user, credit: c.credit})
+    }
+    json.NewEncoder(w).Encode(credit)
+    defer db.Close()
+
+}
+
+
+func GetCredit(w http.ResponseWriter, r *http.Request) {
+
+    db := dbConn()
+    var credit []string
+
+    results, err := db.Query("SELECT id_user,credit FROM credit")
+    if err != nil {panic(err.Error())}
+    for results.Next() {
+        var c Credit
+        err = results.Scan(&c.id_user, &c.credit)
+        if err != nil {panic(err.Error())}
+        credit = append(credit, "{id_user: "+c.id_user+", credit: "+c.credit+"}")
+    }
+
+    defer db.Close()
+    json.NewEncoder(w).Encode(credit)
+    fmt.Println(credit)
+
+
+}
+
+
+
+func main() {
+
+
+    //call_select_use()
+   //fmt.Println(GetCredit_json())
+
+
+    router := mux.NewRouter()
+    router.HandleFunc("/credit", GetCredit).Methods("GET")
+    
+    log.Fatal(http.ListenAndServe(":8000", router))
+
+    
 
 }
