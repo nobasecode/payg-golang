@@ -20,8 +20,8 @@ type Watchlist struct {
 }
 
 type Credit struct {
-	id_user   string    `json:"id_user"`
-	credit string `json:"credit"`
+	Id   string    `json:"id_user"`
+	Crd string `json:"credit"`
 }
 
 type Configuration struct {
@@ -114,25 +114,6 @@ func call_select_use() {
 }
 
 
-func GetCredit_json(w http.ResponseWriter, r *http.Request){
-
-    db := dbConn()
-    var credit []Credit
-
-    results, err := db.Query("SELECT id_user,credit FROM credit")
-    if err != nil {panic(err.Error())}
-    for results.Next() {
-        var c Credit
-        err = results.Scan(&c.id_user, &c.credit)
-        if err != nil {panic(err.Error())}
-        credit = append(credit, Credit {id_user: c.id_user, credit: c.credit})
-    }
-    json.NewEncoder(w).Encode(credit)
-    defer db.Close()
-
-}
-
-
 func GetCredit(w http.ResponseWriter, r *http.Request) {
 
     db := dbConn()
@@ -142,9 +123,9 @@ func GetCredit(w http.ResponseWriter, r *http.Request) {
     if err != nil {panic(err.Error())}
     for results.Next() {
         var c Credit
-        err = results.Scan(&c.id_user, &c.credit)
+        err = results.Scan(&c.Id, &c.Crd)
         if err != nil {panic(err.Error())}
-        credit = append(credit, "{id_user: "+c.id_user+", credit: "+c.credit+"}")
+        credit = append(credit, "{id_user: "+c.Id+", credit: "+c.Crd+"}")
     }
 
     defer db.Close()
@@ -153,6 +134,26 @@ func GetCredit(w http.ResponseWriter, r *http.Request) {
 
 
 }
+
+
+func GetCredit_json(w http.ResponseWriter, r *http.Request){
+
+    db := dbConn()
+    var credit []Credit
+
+    results, err := db.Query("SELECT id_user,credit FROM credit")
+    if err != nil {panic(err.Error())}
+    for results.Next() {
+        var c Credit
+        err = results.Scan(&c.Id, &c.Crd)
+        if err != nil {panic(err.Error())}
+        credit = append(credit, Credit{Id:c.Id, Crd:c.Crd})
+    }
+    json.NewEncoder(w).Encode(credit)
+    defer db.Close()
+
+}
+
 
 
 
@@ -164,7 +165,7 @@ func main() {
 
 
     router := mux.NewRouter()
-    router.HandleFunc("/credit", GetCredit).Methods("GET")
+    router.HandleFunc("/credit", GetCredit_json).Methods("GET")
     
     log.Fatal(http.ListenAndServe(":8000", router))
 
