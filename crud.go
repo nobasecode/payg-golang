@@ -26,6 +26,16 @@ type Configuration struct {
 	id_user string `json:"id_user"`
 }
 
+type Log struct {
+    container   string    `json:"container"`
+    id_user string `json:"id_user"`
+    using_s string `json:"using_s"`
+    using_moment string `json:"using_moment"`
+    update_date string `json:"update_date"`
+    ram string `json:"ram"`
+    cpu string `json:"cpu"`
+    storage string `json:"storage"`
+}
 
 func dbConn() (db *sql.DB) {
     dbDriver := "mysql"
@@ -192,10 +202,29 @@ func insert_credit(id_user string,credit string){
 }
 
 
+func select_use(container string,id_user string,update_date1 string,update_date2 string){
 
+	db := dbConn()
+
+	results, err := db.Query("SELECT * FROM log WHERE container=? and id_user=1 and update_date between ? and ?", container,id_user,update_date1,update_date2)
+	if err != nil {panic(err.Error())}
+
+	for results.Next() {
+		var log Log
+		err = results.Scan(&log.using_s,&log.using_moment,&log.update_date)
+		if err != nil {panic(err.Error())}
+		
+		fmt.Println(log.using_s+" - "+log.using_moment+" - "+log.update_date)
+	}
+	defer db.Close()
+
+}
 
 
 func main() {
+
+
+	//select_use("c1","11","2018-07-16 11:37:31","2018-07-16 11:37:41")
 
 	// insert_credit("12","12535644.12")
 	// fmt.Println(select_credit())
