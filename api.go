@@ -154,7 +154,24 @@ func GetCredit_json(w http.ResponseWriter, r *http.Request){
 
 }
 
+func GetCreditById_json(w http.ResponseWriter, r *http.Request){
 
+    db := dbConn()
+    id := r.URL.Query().Get("id")
+    var credit Credit
+
+    results, err := db.Query("SELECT id_user,credit FROM credit WHERE id_user=?",id)
+    if err != nil {panic(err.Error())}
+    for results.Next() {
+        var c Credit
+        err = results.Scan(&c.Id, &c.Crd)
+        if err != nil {panic(err.Error())}
+        credit = Credit{Id:c.Id, Crd:c.Crd}
+    }
+    json.NewEncoder(w).Encode(credit)
+    defer db.Close()
+
+}
 
 
 func main() {
@@ -165,7 +182,13 @@ func main() {
 
 
     router := mux.NewRouter()
+
+    //http://ip:8000/credit
     router.HandleFunc("/credit", GetCredit_json).Methods("GET")
+
+    //http://ip:8000/credit_user?id=12
+    router.HandleFunc("/credit_user", GetCreditById_json).Methods("GET")
+    	
     
     log.Fatal(http.ListenAndServe(":8000", router))
 
