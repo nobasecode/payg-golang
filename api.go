@@ -174,6 +174,48 @@ func GetCreditById_json(w http.ResponseWriter, r *http.Request){
 }
 
 
+
+func GetUse_json(w http.ResponseWriter, r *http.Request){
+
+    db := dbConn()
+    container := r.URL.Query().Get("container")
+    id_user := r.URL.Query().Get("id_user")
+    update_date1 := r.URL.Query().Get("update_date1")
+    update_time1 := r.URL.Query().Get("update_time1")
+    update_date2 := r.URL.Query().Get("update_date2")
+    update_time2 := r.URL.Query().Get("update_time2")
+
+    all_use := 0
+    credit := []string
+
+    update_date1 = update_date1+" "+update_time1
+    update_date2 = update_date2+" "+update_time2
+
+    results, err := db.Query("SELECT * FROM log WHERE container=? and id_user=? and update_date between ? and ?", container,id_user,update_date1,update_date2)
+    if err != nil {panic(err.Error())}
+
+    for results.Next() {
+        var logi Log
+        err = results.Scan(&logi.container,&logi.id_user,&logi.using_s,&logi.using_moment,&logi.update_date,&logi.ram,&logi.cpu,&logi.storage)
+        if err != nil {panic(err.Error())}
+        
+        using_moment , err:= strconv.Atoi(logi.using_moment)
+        if err != nil {fmt.Println(err)}
+
+        all_use = all_use+using_moment
+
+        credit = append(credit, "{container: "+logi.container+", id_user: "+logi.id_user+", using_s: "+logi.using_s+", using_moment: "+logi.using_moment+", update_date: "+logi.update_date+", ram: "+logi.ram+", cpu: "+logi.cpu", storage: "+logi.storage+"}")        
+
+    }
+
+    credit = append(credit, "{total use: "+strconv.Itoa(all_use)+"}")        
+
+    json.NewEncoder(w).Encode(credit)
+    defer db.Close()
+
+}
+
+
 func main() {
 
 
