@@ -32,6 +32,15 @@ lunch script
 $ go run main.go
 ```
 
+The result will be like below (for every 2s):
+
+
+![alt text](https://i.imgur.com/TnLaW31.png)
+
+```diff
+- You can change your execution time in cron function [c.AddFunc("@every 2s", func()]
+```
+
 ---------------------------------------
 
 
@@ -64,5 +73,21 @@ One you clean all files you will need to add your own informations:
 - Add users credit in "credit" file, following this schema:
 `User ID|Credit($)|`
 
+lunch script
+
+```
+$ go run inspect.go
+```
+
+---------------------------------------
+
+
+### **Using in Log**
+
+you can fetch the using informations (`using time|using credit|CPU|Disk|Total use|`) in a given period of time by executing `use_log.go` script.
+
+The result will be like below :
+
+![alt text](https://i.imgur.com/pj5eJXw.png)
 
 **Golang script to create Docker containers : https://github.com/nobasecode/ContainerGoCreator.git**
