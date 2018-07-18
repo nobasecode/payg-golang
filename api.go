@@ -186,7 +186,7 @@ func GetUse_json(w http.ResponseWriter, r *http.Request){
     update_time2 := r.URL.Query().Get("update_time2")
 
     all_use := 0
-    credit := []string
+    var use []string
 
     update_date1 = update_date1+" "+update_time1
     update_date2 = update_date2+" "+update_time2
@@ -204,16 +204,19 @@ func GetUse_json(w http.ResponseWriter, r *http.Request){
 
         all_use = all_use+using_moment
 
-        credit = append(credit, "{container: "+logi.container+", id_user: "+logi.id_user+", using_s: "+logi.using_s+", using_moment: "+logi.using_moment+", update_date: "+logi.update_date+", ram: "+logi.ram+", cpu: "+logi.cpu", storage: "+logi.storage+"}")        
-
+        use = append(use, "{container:"+logi.container+", id_user:"+logi.id_user+", using_s:"+logi.using_s+", using_moment:"+logi.using_moment+", update_date:"+logi.update_date+", ram:"+logi.ram+", cpu:"+logi.cpu+", storage:"+logi.storage+"}")
+    
     }
 
-    credit = append(credit, "{total use: "+strconv.Itoa(all_use)+"}")        
-
-    json.NewEncoder(w).Encode(credit)
+    use = append(use, "{total use: "+strconv.Itoa(all_use)+"}")        
+    
+    fmt.Println(use)
+    json.NewEncoder(w).Encode(use)
+    
     defer db.Close()
 
 }
+
 
 
 func main() {
@@ -231,9 +234,10 @@ func main() {
     //http://ip:8000/credit_user?id=12
     router.HandleFunc("/credit_user", GetCreditById_json).Methods("GET")
     	
+    //http://172.23.236.111:8000/container_use?container=c1&id_user=11&update_date1=2018-07-16&update_time1=11:37:33&update_date2=2018-07-16&update_time2=11:37:56
+    router.HandleFunc("/container_use", GetUse_json).Methods("GET")        
     
     log.Fatal(http.ListenAndServe(":8000", router))
 
-    
 
 }
