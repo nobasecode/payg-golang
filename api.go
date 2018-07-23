@@ -1,16 +1,15 @@
 package main
 
 import (
-
 	"fmt"
-	"strconv"
-	"log"
+    "strconv"
+    "log"
 	"database/sql"
-	"net/http"
-	"encoding/json"
+    "net/http"
+    "encoding/json"
 
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/gorilla/mux"
+    _ "github.com/go-sql-driver/mysql"
+    "github.com/gorilla/mux"
 )
 
 type Watchlist struct {
@@ -42,7 +41,10 @@ type Log struct {
     ram string `json:"ram"`
     cpu string `json:"cpu"`
     storage string `json:"storage"`
+    credit string `json:"credit"`
 }
+
+
 
 func dbConn() (db *sql.DB) {
     dbDriver := "mysql"
@@ -66,14 +68,14 @@ func select_use(container string,id_user string,update_date1 string,update_time1
     if err != nil {panic(err.Error())}
 
     fmt.Println("\n\033[32mRecord between ["+update_date1+"] and ["+update_date2+"]\033[39m\n")
-    fmt.Println("\033[31m| Using  |     Update time     | RAM  |CPU| Storage |\033[39m")
+    fmt.Println("\033[31m| Using  |     Update time     | RAM  |CPU| Storage | Credit |\033[39m")
 
     for results.Next() {
         var logi Log
-        err = results.Scan(&logi.container,&logi.id_user,&logi.using_s,&logi.using_moment,&logi.update_date,&logi.ram,&logi.cpu,&logi.storage)
+        err = results.Scan(&logi.container,&logi.id_user,&logi.using_s,&logi.using_moment,&logi.update_date,&logi.ram,&logi.cpu,&logi.storage,&logi.credit)
         if err != nil {panic(err.Error())}
         
-        fmt.Println("|"+logi.using_s+" | "+logi.update_date+" | "+logi.ram+" | "+logi.cpu+" | "+logi.storage+"    |")
+        fmt.Println("|"+logi.using_s+" | "+logi.update_date+" | "+logi.ram+" | "+logi.cpu+" | "+logi.storage+"    | " +logi.credit+"    |")
 
         using_moment , err:= strconv.Atoi(logi.using_moment)
         if err != nil {fmt.Println(err)}
@@ -175,7 +177,6 @@ func GetCreditById_json(w http.ResponseWriter, r *http.Request){
 }
 
 
-
 func GetUse_json(w http.ResponseWriter, r *http.Request){
 
     db := dbConn()
@@ -197,7 +198,7 @@ func GetUse_json(w http.ResponseWriter, r *http.Request){
 
     for results.Next() {
         var logi Log
-        err = results.Scan(&logi.container,&logi.id_user,&logi.using_s,&logi.using_moment,&logi.update_date,&logi.ram,&logi.cpu,&logi.storage)
+        err = results.Scan(&logi.container,&logi.id_user,&logi.using_s,&logi.using_moment,&logi.update_date,&logi.ram,&logi.cpu,&logi.storage,&logi.credit)
         if err != nil {panic(err.Error())}
         
         using_moment , err:= strconv.Atoi(logi.using_moment)
@@ -205,7 +206,7 @@ func GetUse_json(w http.ResponseWriter, r *http.Request){
 
         all_use = all_use+using_moment
 
-        use = append(use, "{container:"+logi.container+", id_user:"+logi.id_user+", using_s:"+logi.using_s+", using_moment:"+logi.using_moment+", update_date:"+logi.update_date+", ram:"+logi.ram+", cpu:"+logi.cpu+", storage:"+logi.storage+"}")
+        use = append(use, "{container:"+logi.container+", id_user:"+logi.id_user+", using_s:"+logi.using_s+", using_moment:"+logi.using_moment+", update_date:"+logi.update_date+", ram:"+logi.ram+", cpu:"+logi.cpu+", storage:"+logi.storage+", credit:"+logi.credit+"}")
     
     }
 
@@ -217,8 +218,6 @@ func GetUse_json(w http.ResponseWriter, r *http.Request){
     defer db.Close()
 
 }
-
-
 
 func main() {
 
@@ -234,11 +233,12 @@ func main() {
 
     //http://ip:8000/credit_user?id=12
     router.HandleFunc("/credit_user", GetCreditById_json).Methods("GET")
-    	
+
     //http://172.23.236.111:8000/container_use?container=c1&id_user=11&update_date1=2018-07-16&update_time1=11:37:33&update_date2=2018-07-16&update_time2=11:37:56
     router.HandleFunc("/container_use", GetUse_json).Methods("GET")        
     
     log.Fatal(http.ListenAndServe(":8000", router))
 
+    
 
 }
