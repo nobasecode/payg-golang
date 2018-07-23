@@ -1,15 +1,16 @@
 package main
 
 import (
+
 	"fmt"
-    "strconv"
-    "log"
+	"strconv"
+	"log"
 	"database/sql"
-    "net/http"
-    "encoding/json"
+	"net/http"
+	"encoding/json"
 
 	_ "github.com/go-sql-driver/mysql"
-    "github.com/gorilla/mux"
+	"github.com/gorilla/mux"
 )
 
 type Watchlist struct {
