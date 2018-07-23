@@ -408,6 +408,12 @@ func payg(containers [][]string) {
 
                     update_watchlist(containers[i][0],strconv.Itoa(new_time),t.Format("2006-01-02 15:04:05"))
 
+                    //tu := s_date(containers[i][4]).Add(time.Hour * time.Duration(1) +time.Minute * time.Duration(0) +time.Second * time.Duration(0)))                    
+                    if date_diff > 0 {
+                        insert_log(containers[i][0],id,strconv.Itoa(new_time),strconv.Itoa(date_diff),t.Format("2006-01-02 15:04:05"),strconv.Itoa(ram),strconv.Itoa(cpu),strconv.Itoa(disk))                        
+                    }
+
+
                 }
             }
         }
