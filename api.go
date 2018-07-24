@@ -188,6 +188,7 @@ func GetUse_json(w http.ResponseWriter, r *http.Request){
     update_time2 := r.URL.Query().Get("update_time2")
 
     all_use := 0
+    all_cosom := 0.0
     var use []string
 
     update_date1 = update_date1+" "+update_time1
@@ -206,11 +207,18 @@ func GetUse_json(w http.ResponseWriter, r *http.Request){
 
         all_use = all_use+using_moment
 
+        credit, err := strconv.ParseFloat(logi.credit, 64)
+        if err != nil {fmt.Println(err)}
+
+        all_cosom = all_cosom+credit
+
+
         use = append(use, "{container:"+logi.container+", id_user:"+logi.id_user+", using_s:"+logi.using_s+", using_moment:"+logi.using_moment+", update_date:"+logi.update_date+", ram:"+logi.ram+", cpu:"+logi.cpu+", storage:"+logi.storage+", credit:"+logi.credit+"}")
     
     }
 
-    use = append(use, "{total use: "+strconv.Itoa(all_use)+"}")        
+    use = append(use, "{time_use: "+strconv.Itoa(all_use)+"}")
+    use = append(use, "{credit_use: "+strconv.FormatFloat(all_cosom, 'f', 3, 64)+"}") 
     
     fmt.Println(use)
     json.NewEncoder(w).Encode(use)
@@ -234,7 +242,7 @@ func main() {
     //http://ip:8000/credit_user?id=12
     router.HandleFunc("/credit_user", GetCreditById_json).Methods("GET")
 
-    //http://172.23.236.111:8000/container_use?container=c1&id_user=11&update_date1=2018-07-16&update_time1=11:37:33&update_date2=2018-07-16&update_time2=11:37:56
+    //http://172.23.236.111:8000/container_use?container=c3&id_user=12&update_date1=2018-07-23&update_time1=14:56:18&update_date2=2018-07-23&update_time2=14:57:39
     router.HandleFunc("/container_use", GetUse_json).Methods("GET")        
     
     log.Fatal(http.ListenAndServe(":8000", router))
