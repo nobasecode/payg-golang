@@ -88,6 +88,6 @@ you can fetch the using informations (`using time|using credit|CPU|Disk|Total us
 
 The result will be like below :
 
-![alt text](https://i.imgur.com/pj5eJXw.png)
+![alt text](https://i.imgur.com/ZU84s9I.png)
 
 **Golang script to create Docker containers : https://github.com/nobasecode/ContainerGoCreator.git**
