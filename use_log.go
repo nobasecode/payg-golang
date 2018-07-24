@@ -34,6 +34,7 @@ func select_use(container string,id_user string,update_date1 string,update_time1
 
     db := dbConn()
     all_use := 0
+    all_cosom := 0.0
 
     update_date1 = update_date1+" "+update_time1
     update_date2 = update_date2+" "+update_time2
@@ -42,22 +43,28 @@ func select_use(container string,id_user string,update_date1 string,update_time1
     if err != nil {panic(err.Error())}
 
     fmt.Println("\n\033[32mRecord between ["+update_date1+"] and ["+update_date2+"]\033[39m\n")
-    fmt.Println("\033[31m| Using  |     Update time     | RAM  |CPU| Storage | Credit |\033[39m")
+    fmt.Println("\033[31m| Using  |     Update time     | RAM  |CPU| Storage | Credit\033[39m")
 
     for results.Next() {
         var logi Log
         err = results.Scan(&logi.container,&logi.id_user,&logi.using_s,&logi.using_moment,&logi.update_date,&logi.ram,&logi.cpu,&logi.storage,&logi.credit)
         if err != nil {panic(err.Error())}
         
-        fmt.Println("|"+logi.using_s+" | "+logi.update_date+" | "+logi.ram+" | "+logi.cpu+" | "+logi.storage+"    | " +logi.credit+"    |")
+        fmt.Println("|"+logi.using_s+" | "+logi.update_date+" | "+logi.ram+" | "+logi.cpu+" | "+logi.storage+"    | " +logi.credit+"")
 
         using_moment , err:= strconv.Atoi(logi.using_moment)
         if err != nil {fmt.Println(err)}
 
+        credit, err := strconv.ParseFloat(logi.credit, 64)
+        if err != nil {fmt.Println(err)}
+
         all_use = all_use+using_moment
+        all_cosom = all_cosom+credit
+
     }
 
-    fmt.Println("\n\033[32mTotale use :"+strconv.Itoa(all_use)+"\033[39m\n")
+    fmt.Println("\n\033[32mTotale use (s):"+strconv.Itoa(all_use)+"\033[39m\n")
+    fmt.Println("\n\033[32mTotale consommation (DH):"+strconv.FormatFloat(all_cosom, 'f', 3, 64)+"\033[39m\n")    
     defer db.Close()
 
 }
