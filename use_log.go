@@ -4,7 +4,7 @@ import (
 	"fmt"
     "strconv"
 	"database/sql"
-
+	
     _ "github.com/go-sql-driver/mysql"
 )
 
@@ -17,6 +17,7 @@ type Log struct {
     ram string `json:"ram"`
     cpu string `json:"cpu"`
     storage string `json:"storage"`
+    credit string `json:"credit"`    
 }
 
 func dbConn() (db *sql.DB) {
@@ -41,14 +42,14 @@ func select_use(container string,id_user string,update_date1 string,update_time1
     if err != nil {panic(err.Error())}
 
     fmt.Println("\n\033[32mRecord between ["+update_date1+"] and ["+update_date2+"]\033[39m\n")
-    fmt.Println("\033[31m| Using  |     Update time     | RAM  |CPU| Storage |\033[39m")
+    fmt.Println("\033[31m| Using  |     Update time     | RAM  |CPU| Storage | Credit |\033[39m")
 
     for results.Next() {
         var logi Log
-        err = results.Scan(&logi.container,&logi.id_user,&logi.using_s,&logi.using_moment,&logi.update_date,&logi.ram,&logi.cpu,&logi.storage)
+        err = results.Scan(&logi.container,&logi.id_user,&logi.using_s,&logi.using_moment,&logi.update_date,&logi.ram,&logi.cpu,&logi.storage,&logi.credit)
         if err != nil {panic(err.Error())}
         
-        fmt.Println("|"+logi.using_s+" | "+logi.update_date+" | "+logi.ram+" | "+logi.cpu+" | "+logi.storage+"    |")
+        fmt.Println("|"+logi.using_s+" | "+logi.update_date+" | "+logi.ram+" | "+logi.cpu+" | "+logi.storage+"    | " +logi.credit+"    |")
 
         using_moment , err:= strconv.Atoi(logi.using_moment)
         if err != nil {fmt.Println(err)}
@@ -90,6 +91,7 @@ func call_select_use() {
 }
 
 func main() {
+
 
     call_select_use()
 
