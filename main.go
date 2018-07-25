@@ -55,6 +55,7 @@ type Log struct {
     ram string `json:"ram"`
     cpu string `json:"cpu"`
     storage string `json:"storage"`
+    credit string `json:"credit"`
 }
 
 func dbConn() (db *sql.DB) {
@@ -315,10 +316,10 @@ func update_watchlist(container string,using_s string,update_date string){
     defer db.Close()
 }
 
-func insert_log(container string,id_user string,using_s string,using_moment string,update_date string,ram string,cpu string,storage string){
+func insert_log(container string,id_user string,using_s string,using_moment string,update_date string,ram string,cpu string,storage string,credit string){
 
     db := dbConn()
-     insert, err := db.Query("INSERT INTO log VALUES ('"+container+"', '"+id_user+"', '"+using_s+"', '"+using_moment+"', '"+update_date+"', '"+ram+"', '"+cpu+"', '"+storage+"')")
+     insert, err := db.Query("INSERT INTO log VALUES ('"+container+"', '"+id_user+"', '"+using_s+"', '"+using_moment+"', '"+update_date+"', '"+ram+"', '"+cpu+"', '"+storage+"','"+credit+"')")
      if err != nil {panic(err.Error())}
 
      defer insert.Close()
@@ -373,7 +374,7 @@ func payg(containers [][]string) {
 
                     update_watchlist(containers[i][0],strconv.Itoa(new_time),t.Format("2006-01-02 15:04:05"))
 
-                    insert_log(containers[i][0],id,strconv.Itoa(new_time),strconv.Itoa(date_diff),t.Format("2006-01-02 15:04:05"),strconv.Itoa(ram),strconv.Itoa(cpu),strconv.Itoa(disk))
+                    insert_log(containers[i][0],id,strconv.Itoa(new_time),strconv.Itoa(date_diff),t.Format("2006-01-02 15:04:05"),strconv.Itoa(ram),strconv.Itoa(cpu),strconv.Itoa(disk),strconv.FormatFloat(use, 'f', 3, 64))
 
                 }
             }
@@ -410,7 +411,7 @@ func payg(containers [][]string) {
 
                     //tu := s_date(containers[i][4]).Add(time.Hour * time.Duration(1) +time.Minute * time.Duration(0) +time.Second * time.Duration(0)))                    
                     if date_diff > 0 {
-                        insert_log(containers[i][0],id,strconv.Itoa(new_time),strconv.Itoa(date_diff),t.Format("2006-01-02 15:04:05"),strconv.Itoa(ram),strconv.Itoa(cpu),strconv.Itoa(disk))                        
+                        insert_log(containers[i][0],id,strconv.Itoa(new_time),strconv.Itoa(date_diff),t.Format("2006-01-02 15:04:05"),strconv.Itoa(ram),strconv.Itoa(cpu),strconv.Itoa(disk),strconv.FormatFloat(use, 'f', 3, 64))                        
                     }
 
 
