@@ -18,10 +18,11 @@ $ git clone https://github.com/nobasecode/payg-golang.git
 Import database from payg.sql
 
 ```
-$ CREATE DATABASE newdatabase;
+$ mysql -u [username] -p ;
+$ CREATE DATABASE payg;
 ```
 ```
-$ mysql -u [username] -p newdatabase < [database name].sql
+$ mysql -u [username] -p payg < path/payg.sql
 ```
 
 You need to clean the follwing tables (credit & configuration) and add your own containers informations.
